@@ -6,7 +6,6 @@
     <title>GlobeTunes - Virtual Music Universe</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
     <style>
-        /* General Reset */
         * {
             margin: 0;
             padding: 0;
@@ -21,7 +20,6 @@
             background: radial-gradient(circle, #0d1b2a, #000);
         }
 
-        /* Intro Section */
         #intro {
             position: fixed;
             top: 0;
@@ -75,7 +73,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Main UI Section */
         #main-ui {
             display: none;
             min-height: 100vh;
@@ -126,7 +123,7 @@
             padding-bottom: 20px;
         }
 
-        .hologram-player {
+        .hologram-player, .radio-globe {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 15px;
@@ -135,7 +132,7 @@
             max-width: 400px;
         }
 
-        .player-screen {
+        .player-screen, .radio-display {
             width: 100%;
             height: 150px;
             background: #000;
@@ -145,9 +142,10 @@
             color: #fff;
             border: 2px solid #00d4ff;
             font-size: clamp(1rem, 3vw, 1.2rem);
+            text-align: center;
         }
 
-        .controls {
+        .controls, .tuner-controls {
             margin-top: 10px;
             display: flex;
             flex-wrap: wrap;
@@ -191,39 +189,10 @@
             font-size: clamp(0.9rem, 2vw, 1rem);
         }
 
-        .radio-globe {
-            text-align: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            box-shadow: 0 0 20px #ff00ff;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .radio-display {
-            margin: 10px 0;
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            text-shadow: 0 0 10px #00d4ff;
-        }
-
-        .tuner-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .tuner-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
         .tuner-slider {
             width: 100%;
             max-width: 300px;
-            margin: 0 auto;
+            margin: 10px auto;
         }
 
         input[type="range"] {
@@ -251,7 +220,6 @@
             box-shadow: 0 0 10px #ff00ff;
         }
 
-        /* Responsive Adjustments */
         @media (max-width: 600px) {
             header {
                 flex-direction: column;
@@ -293,28 +261,33 @@
         </header>
         <main>
             <div class="hologram-player">
-                <div class="player-screen">Music Player Placeholder</div>
+                <div class="player-screen" id="music-display">No Track Loaded</div>
+                <audio id="music-audio" style="display:none;"></audio>
                 <div class="controls">
-                    <button class="futuristic-btn">Play</button>
-                    <button class="futuristic-btn">Pause</button>
-                    <button class="futuristic-btn">Next</button>
+                    <button class="futuristic-btn" onclick="playMusic()">Play</button>
+                    <button class="futuristic-btn" onclick="pauseMusic()">Pause</button>
+                    <button class="futuristic-btn" onclick="stopMusic()">Stop</button>
+                    <button class="futuristic-btn" onclick="loadSampleTrack()">Load Sample</button>
                 </div>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search the Music Universe..." class="futuristic-input">
-                <button class="futuristic-btn">Go</button>
+                <input type="text" placeholder="Search the Music Universe..." class="futuristic-input" id="music-search">
+                <button class="futuristic-btn" onclick="searchMusic()">Go</button>
             </div>
             <div class="radio-globe">
-                <p>Live Radio Globe</p>
-                <div class="radio-display" id="radio-station">Station: 101.5 FM - Cosmic Beats</div>
+                <div class="radio-display" id="radio-station">Station: Not Loaded</div>
+                <audio id="radio-audio" style="display:none;"></audio>
                 <div class="tuner-controls">
                     <div class="tuner-buttons">
+                        <button class="futuristic-btn" onclick="playRadio()">Play</button>
+                        <button class="futuristic-btn" onclick="pauseRadio()">Pause</button>
+                        <button class="futuristic-btn" onclick="stopRadio()">Stop</button>
                         <button class="futuristic-btn" onclick="tuneDown()">-</button>
                         <button class="futuristic-btn" onclick="tuneUp()">+</button>
                         <button class="futuristic-btn" onclick="scanStations()">Scan</button>
                     </div>
                     <div class="tuner-slider">
-                        <input type="range" min="87.5" max="108" value="101.5" step="0.1" id="frequency-slider" oninput="updateFrequency(this.value)">
+                        <input type="range" min="0" max="4" value="0" step="1" id="station-slider" oninput="updateStation(this.value)">
                     </div>
                 </div>
             </div>
@@ -322,59 +295,130 @@
     </div>
 
     <script>
+        // Intro Transition
         function enterMainUI() {
             const intro = document.getElementById('intro');
             const mainUI = document.getElementById('main-ui');
-            
             intro.classList.add('hidden');
             setTimeout(() => {
                 intro.style.display = 'none';
                 mainUI.classList.add('active');
+                loadInitialRadioStations(); // Load radio stations on entry
             }, 1000);
         }
 
-        // Simulated radio stations (for demo purposes)
-        const stations = [
-            "87.9 FM - Galaxy Waves",
-            "92.3 FM - Nebula Radio",
-            "95.7 FM - Starlight Sounds",
-            "101.5 FM - Cosmic Beats",
-            "105.1 FM - Orbit FM"
-        ];
+        // Music Player Functions
+        const musicAudio = document.getElementById('music-audio');
+        const musicDisplay = document.getElementById('music-display');
 
-        let currentFreq = 101.5;
+        function playMusic() {
+            musicAudio.play();
+        }
 
-        function updateFrequency(freq) {
-            currentFreq = parseFloat(freq);
-            const stationDisplay = document.getElementById('radio-station');
-            const closestStation = stations.reduce((prev, curr) => {
-                const prevFreq = parseFloat(prev.split(" ")[0]);
-                const currFreq = parseFloat(curr.split(" ")[0]);
-                return Math.abs(currFreq - currentFreq) < Math.abs(prevFreq - currentFreq) ? curr : prev;
-            });
-            stationDisplay.textContent = `Station: ${closestStation}`;
+        function pauseMusic() {
+            musicAudio.pause();
+        }
+
+        function stopMusic() {
+            musicAudio.pause();
+            musicAudio.currentTime = 0;
+            musicDisplay.textContent = "No Track Loaded";
+        }
+
+        function loadSampleTrack() {
+            // Using a sample track from TheAudioDB (placeholder URL for demo)
+            fetch('https://www.theaudiodb.com/api/v1/json/1/searchtrack.php?s=radiohead')
+                .then(response => response.json())
+                .then(data => {
+                    const track = data.track[0];
+                    musicDisplay.textContent = `${track.strTrack} by ${track.strArtist}`;
+                    // Simulated audio URL (TheAudioDB doesn't provide direct streams, so this is a placeholder)
+                    musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Free sample MP3
+                    musicAudio.play();
+                })
+                .catch(error => console.error('Error loading track:', error));
+        }
+
+        function searchMusic() {
+            const query = document.getElementById('music-search').value;
+            if (query) {
+                fetch(`https://www.theaudiodb.com/api/v1/json/1/searchtrack.php?s=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.track && data.track.length > 0) {
+                            const track = data.track[0];
+                            musicDisplay.textContent = `${track.strTrack} by ${track.strArtist}`;
+                            musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Placeholder
+                            musicAudio.play();
+                        } else {
+                            musicDisplay.textContent = "No Track Found";
+                        }
+                    })
+                    .catch(error => console.error('Error searching music:', error));
+            }
+        }
+
+        // Radio Functions
+        const radioAudio = document.getElementById('radio-audio');
+        const radioStationDisplay = document.getElementById('radio-station');
+        let radioStations = [];
+
+        function loadInitialRadioStations() {
+            fetch('https://de1.api.radio-browser.info/json/stations/bycountry/usa?limit=5')
+                .then(response => response.json())
+                .then(data => {
+                    radioStations = data.map(station => ({
+                        name: station.name,
+                        url: station.url_resolved
+                    }));
+                    updateStation(0);
+                })
+                .catch(error => console.error('Error loading radio stations:', error));
+        }
+
+        function playRadio() {
+            radioAudio.play();
+        }
+
+        function pauseRadio() {
+            radioAudio.pause();
+        }
+
+        function stopRadio() {
+            radioAudio.pause();
+            radioAudio.currentTime = 0;
+            radioStationDisplay.textContent = "Station: Not Loaded";
+        }
+
+        function updateStation(index) {
+            if (radioStations.length > 0 && index >= 0 && index < radioStations.length) {
+                const station = radioStations[index];
+                radioStationDisplay.textContent = `Station: ${station.name}`;
+                radioAudio.src = station.url;
+                document.getElementById('station-slider').value = index;
+            }
         }
 
         function tuneDown() {
-            const slider = document.getElementById('frequency-slider');
-            slider.value = parseFloat(slider.value) - 0.1;
-            updateFrequency(slider.value);
+            const slider = document.getElementById('station-slider');
+            const newIndex = Math.max(0, parseInt(slider.value) - 1);
+            slider.value = newIndex;
+            updateStation(newIndex);
         }
 
         function tuneUp() {
-            const slider = document.getElementById('frequency-slider');
-            slider.value = parseFloat(slider.value) + 0.1;
-            updateFrequency(slider.value);
+            const slider = document.getElementById('station-slider');
+            const newIndex = Math.min(radioStations.length - 1, parseInt(slider.value) + 1);
+            slider.value = newIndex;
+            updateStation(newIndex);
         }
 
         function scanStations() {
-            const slider = document.getElementById('frequency-slider');
             let index = 0;
             const scan = setInterval(() => {
-                slider.value = parseFloat(stations[index].split(" ")[0]);
-                updateFrequency(slider.value);
+                updateStation(index);
                 index++;
-                if (index >= stations.length) clearInterval(scan);
+                if (index >= radioStations.length) clearInterval(scan);
             }, 1000);
         }
 
