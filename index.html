@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeTunes - Virtual Music Universe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            background: radial-gradient(circle, #0d1b2a, #000);
+        }
+
+        /* Intro Section */
+        #intro {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            transition: opacity 1s ease;
+            z-index: 10;
+        }
+
+        #intro.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-container {
+            text-align: center;
+        }
+
+        .intro-container h1 {
+            font-size: 4rem;
+            text-shadow: 0 0 10px #00d4ff;
+        }
+
+        .intro-container p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .pulse-button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            color: #fff;
+            background: #00d4ff;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 0 20px #00d4ff;
+            animation: pulse 1.5s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Main UI Section */
+        #main-ui {
+            display: none;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        #main-ui.active {
+            display: block;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .neon-text {
+            font-size: 3rem;
+            text-shadow: 0 0 15px #ff00ff, 0 0 30px #00d4ff;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #ff00ff;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .hologram-player {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #00d4ff;
+        }
+
+        .player-screen {
+            width: 300px;
+            height: 150px;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            border: 2px solid #00d4ff;
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .futuristic-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #ff00ff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .futuristic-btn:hover {
+            background: #ff00ff;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .futuristic-input {
+            padding: 10px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00d4ff;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .radio-globe {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Section -->
+    <div id="intro">
+        <div class="intro-container">
+            <h1>GlobeTunes</h1>
+            <p>Step into a universe of sound. Search and stream music from every corner of the globe, download your favorite tracks, and tune into live radio stations worldwide. Your sonic journey begins here.</p>
+            <button class="pulse-button" onclick="enterMainUI()">Tap to Enter Virtual Music</button>
+        </div>
+    </div>
+
+    <!-- Main UI Section -->
+    <div id="main-ui">
+        <header>
+            <h1 class="neon-text">GlobeTunes</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link">Search Music</a></li>
+                    <li><a href="#" class="nav-link">Live Radio</a></li>
+                    <li><a href="#" class="nav-link">Downloads</a></li>
+                    <li><a href="#" class="nav-link">Stream Live</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main>
+            <div class="hologram-player">
+                <div class="player-screen">Music Player Placeholder</div>
+                <div class="controls">
+                    <button class="futuristic-btn">Play</button>
+                    <button class="futuristic-btn">Pause</button>
+                    <button class="futuristic-btn">Next</button>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search the Music Universe..." class="futuristic-input">
+                <button class="futuristic-btn">Go</button>
+            </div>
+            <div class="radio-globe">
+                <p>Live Radio Globe - Click to Spin</p>
+                <!-- Placeholder for a 3D globe animation -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function enterMainUI() {
+            const intro = document.getElementById('intro');
+            const mainUI = document.getElementById('main-ui');
+            
+            intro.classList.add('hidden');
+            setTimeout(() => {
+                intro.style.display = 'none';
+                mainUI.classList.add('active');
+            }, 1000); // Matches the CSS transition duration
+        }
+
+        console.log("GlobeTunes UI Loaded");
+    </script>
+</body>
+</html>
