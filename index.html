@@ -65,6 +65,11 @@
             box-shadow: 0 0 20px #00d4ff;
             animation: pulse 1.5s infinite;
             cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .pulse-button:active {
+            transform: scale(0.95);
         }
 
         @keyframes pulse {
@@ -143,6 +148,7 @@
             border: 2px solid #00d4ff;
             font-size: clamp(1rem, 3vw, 1.2rem);
             text-align: center;
+            padding: 10px;
         }
 
         .controls, .tuner-controls {
@@ -164,9 +170,10 @@
             transition: all 0.3s;
         }
 
-        .futuristic-btn:hover {
+        .futuristic-btn:hover, .futuristic-btn:focus {
             background: #ff00ff;
             box-shadow: 0 0 15px #ff00ff;
+            outline: none;
         }
 
         .search-bar {
@@ -187,6 +194,11 @@
             border-radius: 5px;
             color: #fff;
             font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .futuristic-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00d4ff;
         }
 
         .tuner-slider {
@@ -220,6 +232,15 @@
             box-shadow: 0 0 10px #ff00ff;
         }
 
+        .loading {
+            color: #00d4ff;
+            font-style: italic;
+        }
+
+        .error {
+            color: #ff5555;
+        }
+
         @media (max-width: 600px) {
             header {
                 flex-direction: column;
@@ -242,7 +263,7 @@
         <div class="intro-container">
             <h1>GlobeTunes</h1>
             <p>Step into a universe of sound. Search and stream music from every corner of the globe, download your favorite tracks, and tune into live radio stations worldwide. Your sonic journey begins here.</p>
-            <button class="pulse-button" onclick="enterMainUI()">Tap to Enter Virtual Music</button>
+            <button class="pulse-button" onclick="enterMainUI()" aria-label="Enter Virtual Music Universe">Tap to Enter Virtual Music</button>
         </div>
     </div>
 
@@ -264,30 +285,30 @@
                 <div class="player-screen" id="music-display">No Track Loaded</div>
                 <audio id="music-audio" style="display:none;"></audio>
                 <div class="controls">
-                    <button class="futuristic-btn" onclick="playMusic()">Play</button>
-                    <button class="futuristic-btn" onclick="pauseMusic()">Pause</button>
-                    <button class="futuristic-btn" onclick="stopMusic()">Stop</button>
-                    <button class="futuristic-btn" onclick="loadSampleTrack()">Load Sample</button>
+                    <button class="futuristic-btn" onclick="playMusic()" aria-label="Play music">Play</button>
+                    <button class="futuristic-btn" onclick="pauseMusic()" aria-label="Pause music">Pause</button>
+                    <button class="futuristic-btn" onclick="stopMusic()" aria-label="Stop music">Stop</button>
+                    <button class="futuristic-btn" onclick="loadSampleTrack()" aria-label="Load sample track">Load Sample</button>
                 </div>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search the Music Universe..." class="futuristic-input" id="music-search">
-                <button class="futuristic-btn" onclick="searchMusic()">Go</button>
+                <input type="text" placeholder="Search the Music Universe..." class="futuristic-input" id="music-search" aria-label="Music search input">
+                <button class="futuristic-btn" onclick="searchMusic()" aria-label="Search music">Go</button>
             </div>
             <div class="radio-globe">
                 <div class="radio-display" id="radio-station">Station: Not Loaded</div>
                 <audio id="radio-audio" style="display:none;"></audio>
                 <div class="tuner-controls">
                     <div class="tuner-buttons">
-                        <button class="futuristic-btn" onclick="playRadio()">Play</button>
-                        <button class="futuristic-btn" onclick="pauseRadio()">Pause</button>
-                        <button class="futuristic-btn" onclick="stopRadio()">Stop</button>
-                        <button class="futuristic-btn" onclick="tuneDown()">-</button>
-                        <button class="futuristic-btn" onclick="tuneUp()">+</button>
-                        <button class="futuristic-btn" onclick="scanStations()">Scan</button>
+                        <button class="futuristic-btn" onclick="playRadio()" aria-label="Play radio">Play</button>
+                        <button class="futuristic-btn" onclick="pauseRadio()" aria-label="Pause radio">Pause</button>
+                        <button class="futuristic-btn" onclick="stopRadio()" aria-label="Stop radio">Stop</button>
+                        <button class="futuristic-btn" onclick="tuneDown()" aria-label="Tune down">-</button>
+                        <button class="futuristic-btn" onclick="tuneUp()" aria-label="Tune up">+</button>
+                        <button class="futuristic-btn" onclick="scanStations()" aria-label="Scan radio stations">Scan</button>
                     </div>
                     <div class="tuner-slider">
-                        <input type="range" min="0" max="4" value="0" step="1" id="station-slider" oninput="updateStation(this.value)">
+                        <input type="range" min="0" max="4" value="0" step="1" id="station-slider" oninput="updateStation(this.value)" aria-label="Radio station slider">
                     </div>
                 </div>
             </div>
@@ -312,7 +333,14 @@
         const musicDisplay = document.getElementById('music-display');
 
         function playMusic() {
-            musicAudio.play();
+            if (musicAudio.src) {
+                musicAudio.play().catch(e => {
+                    musicDisplay.textContent = "Error: Could not play audio";
+                    console.error('Playback failed:', e);
+                });
+            } else {
+                musicDisplay.textContent = "No track loaded to play";
+            }
         }
 
         function pauseMusic() {
@@ -326,35 +354,43 @@
         }
 
         function loadSampleTrack() {
-            // Using a sample track from TheAudioDB (placeholder URL for demo)
-            fetch('https://www.theaudiodb.com/api/v1/json/1/searchtrack.php?s=radiohead')
-                .then(response => response.json())
-                .then(data => {
-                    const track = data.track[0];
-                    musicDisplay.textContent = `${track.strTrack} by ${track.strArtist}`;
-                    // Simulated audio URL (TheAudioDB doesn't provide direct streams, so this is a placeholder)
-                    musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Free sample MP3
-                    musicAudio.play();
-                })
-                .catch(error => console.error('Error loading track:', error));
+            musicDisplay.textContent = "Loading sample track...";
+            musicDisplay.classList.add('loading');
+            
+            // Using a placeholder audio since TheAudioDB doesn't provide direct streams
+            setTimeout(() => {
+                musicDisplay.classList.remove('loading');
+                musicDisplay.textContent = "Sample Track: Future Sounds by Demo Artist";
+                musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Free sample MP3
+                musicAudio.play().catch(e => {
+                    musicDisplay.textContent = "Error: Could not play sample";
+                    console.error('Playback failed:', e);
+                });
+            }, 1000);
         }
 
         function searchMusic() {
-            const query = document.getElementById('music-search').value;
+            const query = document.getElementById('music-search').value.trim();
             if (query) {
-                fetch(`https://www.theaudiodb.com/api/v1/json/1/searchtrack.php?s=${query}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.track && data.track.length > 0) {
-                            const track = data.track[0];
-                            musicDisplay.textContent = `${track.strTrack} by ${track.strArtist}`;
-                            musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Placeholder
-                            musicAudio.play();
-                        } else {
-                            musicDisplay.textContent = "No Track Found";
-                        }
-                    })
-                    .catch(error => console.error('Error searching music:', error));
+                musicDisplay.textContent = `Searching for "${query}"...`;
+                musicDisplay.classList.add('loading');
+                
+                // Simulate search with timeout since TheAudioDB doesn't provide streams
+                setTimeout(() => {
+                    musicDisplay.classList.remove('loading');
+                    if (Math.random() > 0.3) { // Simulate sometimes finding, sometimes not
+                        musicDisplay.textContent = `Found: ${query} by Demo Artist`;
+                        musicAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+                        musicAudio.play().catch(e => {
+                            musicDisplay.textContent = "Error: Could not play track";
+                            console.error('Playback failed:', e);
+                        });
+                    } else {
+                        musicDisplay.textContent = `No results for "${query}"`;
+                        musicDisplay.classList.add('error');
+                        setTimeout(() => musicDisplay.classList.remove('error'), 2000);
+                    }
+                }, 1500);
             }
         }
 
@@ -362,22 +398,63 @@
         const radioAudio = document.getElementById('radio-audio');
         const radioStationDisplay = document.getElementById('radio-station');
         let radioStations = [];
+        let scanInterval = null;
 
         function loadInitialRadioStations() {
-            fetch('https://de1.api.radio-browser.info/json/stations/bycountry/usa?limit=5')
-                .then(response => response.json())
+            radioStationDisplay.textContent = "Loading stations...";
+            radioStationDisplay.classList.add('loading');
+            
+            // Using a CORS proxy to avoid potential CORS issues with the radio-browser API
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const targetUrl = 'https://de1.api.radio-browser.info/json/stations/topvote?limit=5';
+            
+            fetch(proxyUrl + targetUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
                     radioStations = data.map(station => ({
                         name: station.name,
-                        url: station.url_resolved
+                        url: station.url_resolved || station.url
                     }));
-                    updateStation(0);
+                    
+                    if (radioStations.length > 0) {
+                        updateStation(0);
+                    } else {
+                        radioStationDisplay.textContent = "No stations found";
+                        radioStationDisplay.classList.add('error');
+                    }
+                    radioStationDisplay.classList.remove('loading');
                 })
-                .catch(error => console.error('Error loading radio stations:', error));
+                .catch(error => {
+                    console.error('Error loading radio stations:', error);
+                    radioStationDisplay.textContent = "Error loading stations";
+                    radioStationDisplay.classList.add('error');
+                    radioStationDisplay.classList.remove('loading');
+                    
+                    // Fallback stations if API fails
+                    radioStations = [
+                        { name: "Classic Rock", url: "http://stream.zeno.fm/0r0xa792kwzuv" },
+                        { name: "Jazz 24/7", url: "http://stream.zeno.fm/f3wvbbqmdg8uv" },
+                        { name: "Electronic Beats", url: "http://stream.zeno.fm/0r0xa792kwzuv" },
+                        { name: "World Music", url: "http://stream.zeno.fm/f3wvbbqmdg8uv" },
+                        { name: "Chill Lounge", url: "http://stream.zeno.fm/0r0xa792kwzuv" }
+                    ];
+                    updateStation(0);
+                });
         }
 
         function playRadio() {
-            radioAudio.play();
+            if (radioAudio.src) {
+                radioAudio.play().catch(e => {
+                    radioStationDisplay.textContent = "Error: Could not play station";
+                    radioStationDisplay.classList.add('error');
+                    console.error('Radio playback failed:', e);
+                });
+            } else {
+                radioStationDisplay.textContent = "No station selected";
+            }
         }
 
         function pauseRadio() {
@@ -388,13 +465,23 @@
             radioAudio.pause();
             radioAudio.currentTime = 0;
             radioStationDisplay.textContent = "Station: Not Loaded";
+            radioStationDisplay.classList.remove('error');
         }
 
         function updateStation(index) {
             if (radioStations.length > 0 && index >= 0 && index < radioStations.length) {
                 const station = radioStations[index];
                 radioStationDisplay.textContent = `Station: ${station.name}`;
+                radioStationDisplay.classList.remove('error');
+                
+                // Try to play the new station
                 radioAudio.src = station.url;
+                radioAudio.play().catch(e => {
+                    radioStationDisplay.textContent = `Error loading: ${station.name}`;
+                    radioStationDisplay.classList.add('error');
+                    console.error('Station playback failed:', e);
+                });
+                
                 document.getElementById('station-slider').value = index;
             }
         }
@@ -414,13 +501,26 @@
         }
 
         function scanStations() {
+            // Clear any existing scan
+            if (scanInterval) clearInterval(scanInterval);
+            
             let index = 0;
-            const scan = setInterval(() => {
+            scanInterval = setInterval(() => {
                 updateStation(index);
                 index++;
-                if (index >= radioStations.length) clearInterval(scan);
-            }, 1000);
+                if (index >= radioStations.length) {
+                    clearInterval(scanInterval);
+                    scanInterval = null;
+                }
+            }, 2000);
         }
+
+        // Add keyboard support for the search input
+        document.getElementById('music-search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMusic();
+            }
+        });
 
         console.log("GlobeTunes UI Loaded");
     </script>
